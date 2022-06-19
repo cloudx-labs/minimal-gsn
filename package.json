@@ -11,12 +11,15 @@
     "@opengsn/contracts": "3.0.0-alpha.6",
     "@opengsn/paymasters": "3.0.0-alpha.6",
     "@openzeppelin/contracts": "4.7.0-rc.0",
+    "@typechain/ethers-v5": "^10.1.0",
     "@typechain/hardhat": "6.1.2",
     "@types/dotenv": "8.2.0",
     "@types/node": "18.0.0",
     "dotenv": "16.0.1",
+    "ethers": "^5.6.9",
     "hardhat": "2.9.9",
     "ts-node": "10.8.1",
+    "typechain": "^8.1.0",
     "typescript": "4.7.4"
   }
 }

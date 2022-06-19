@@ -3,7 +3,8 @@
     "target": "es2018",
     "module": "commonjs",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "outDir": "dist"
   },
   "include": ["**/*.ts", "./scripts/**.ts"],
   "exclude": ["node_modules"],
