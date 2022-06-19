@@ -1,0 +1,7 @@
+node_modules/
+cache/
+artifacts/
+abis/
+typechain-types
+
+.env
