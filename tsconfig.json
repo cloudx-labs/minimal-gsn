@@ -3,10 +3,23 @@
     "target": "es2018",
     "module": "commonjs",
     "strict": true,
+    "outDir": "dist",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
-    "outDir": "dist"
+    "moduleResolution": "node",
+    "noEmit": false,
+    "skipLibCheck": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "declaration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["openzeppelin__test-helpers", "date-format", "chai-bn"],
+    "typeRoots": ["./node_modules/@types", "typing"]
   },
-  "include": ["**/*.ts", "./scripts/**.ts"],
-  "exclude": ["node_modules"],
+  "include": ["**/*.ts", "./scripts/**.ts", "patch-scrypt.js"],
+  "exclude": ["node_modules", "dist", "typechain-types"],
   "files": ["./hardhat.config.ts"]
 }
