@@ -54,7 +54,8 @@ async function main() {
   // /////////////////////////////////////////////////////////////////////////
   const provider = ethers.getDefaultProvider(TESTCHAIN_URL)
   const wallet = new ethers.Wallet(TESTCHAIN_PRIVATE_KEY, provider)
-  const signer = await ethers.getSigner(DEVELOPER_ADDRESS)
+  // @ts-ignore
+  const signer = await ethers.getSigner()
 
   const tokenContract = new ethers.Contract(TOKEN_ADDRESS, TokenInterface.abi, signer);
   const stakeManagerContract = new ethers.Contract(STAKE_MANAGER_ADDRESS, StakeManagerInterface.abi, signer);
