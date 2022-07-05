@@ -6,15 +6,13 @@ import StakeManagerInterface from '../abis/@opengsn/contracts/src/StakeManager.s
 import RelayHubInterface from '../abis/@opengsn/contracts/src/RelayHub.sol/RelayHub.json';
 import PaymasterInterface from '../abis/@opengsn/paymasters/contracts/AcceptEverythingPaymaster.sol/AcceptEverythingPaymaster.json';
 import ForwarderInterface from '../abis/@opengsn/contracts/src/forwarder/Forwarder.sol/Forwarder.json';
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 
-
-const MANAGER_ADDRESS = process.env.MANAGER_ADDRESS
-const TOKEN_ADDRESS =  process.env.TOKEN_ADDRESS
-const STAKE_MANAGER_ADDRESS = process.env.STAKE_MANAGER_ADDRESS 
-const RELAY_HUB_ADDRESS = process.env.RELAY_HUB_ADDRESS 
-const PAYMASTER_ADDRESS = process.env.PAYMASTER_ADDRESS 
-const FORWARDER_ADDRESS = process.env.FORWARDER_ADDRESS
+const MANAGER_ADDRESS = process.env.MANAGER_ADDRESS!
+const TOKEN_ADDRESS =  process.env.TOKEN_ADDRESS!
+const STAKE_MANAGER_ADDRESS = process.env.STAKE_MANAGER_ADDRESS!
+const RELAY_HUB_ADDRESS = process.env.RELAY_HUB_ADDRESS!
+const PAYMASTER_ADDRESS = process.env.PAYMASTER_ADDRESS!
+const FORWARDER_ADDRESS = process.env.FORWARDER_ADDRESS!
 
 const TESTCHAIN_URL = process.env.TESTCHAIN_URL!
 const TESTCHAIN_PRIVATE_KEY = process.env.TESTCHAIN_PRIVATE_KEY!
@@ -35,11 +33,25 @@ const GsnDomainSeparatorType = {
   version: '3'
 }
 
+const configs = {
+  MANAGER_ADDRESS,
+  TOKEN_ADDRESS,
+  STAKE_MANAGER_ADDRESS,
+  RELAY_HUB_ADDRESS,
+  PAYMASTER_ADDRESS,
+  FORWARDER_ADDRESS,
+  TESTCHAIN_URL,
+  TESTCHAIN_PRIVATE_KEY,
+  amountInEther,
+  paymasterDeposit,
+  amountTokens,
+  unstakeDelay,
+}
+
 async function main() {
   // /////////////////////////////////////////////////////////////////////////
   // Config Relay Server
   // /////////////////////////////////////////////////////////////////////////
-  let tx: TransactionResponse
   const provider = ethers.getDefaultProvider(TESTCHAIN_URL)
   const wallet = new ethers.Wallet(TESTCHAIN_PRIVATE_KEY, provider)
   const signer = await ethers.getSigner()
@@ -49,46 +61,36 @@ async function main() {
   const relayHubContract = new ethers.Contract(RELAY_HUB_ADDRESS, RelayHubInterface.abi, signer);
   const paymasterContract = new ethers.Contract(PAYMASTER_ADDRESS, PaymasterInterface.abi, signer);
   const forwarderContract = new ethers.Contract(FORWARDER_ADDRESS, ForwarderInterface.abi, signer);
-
+  console.log(configs)
   // send ether to Manager
-  tx = await wallet.sendTransaction({ to: MANAGER_ADDRESS, value: amountInEther })
-  await tx.wait()
+  await wallet.sendTransaction({ to: MANAGER_ADDRESS, value: amountInEther })
   console.log("1 - send ether to Manager: ✔️")
   // approve StakeManager to send $GSN
-  tx = await tokenContract.approve(STAKE_MANAGER_ADDRESS, amountTokens)
-  await tx.wait()
+  await tokenContract.approve(STAKE_MANAGER_ADDRESS, amountTokens)
   console.log("2 - approve StakeManager to send $GSN: ✔️")
   // stake tokens
-  tx = await stakeManagerContract.stakeForRelayManager(TOKEN_ADDRESS, MANAGER_ADDRESS, unstakeDelay, amountTokens)
-  await tx.wait()
+  await stakeManagerContract.stakeForRelayManager(TOKEN_ADDRESS, MANAGER_ADDRESS, unstakeDelay, amountTokens)
   console.log("3 - stake tokens: ✔️")
   // set minimun stake
-  tx = await relayHubContract.setMinimumStakes([TOKEN_ADDRESS], [amountTokens])
-  await tx.wait()
+  await relayHubContract.setMinimumStakes([TOKEN_ADDRESS], [amountTokens])
   console.log("4 - set minimun stake: ✔️")
   // authorize hub
-  tx = await stakeManagerContract.authorizeHubByOwner(MANAGER_ADDRESS, RELAY_HUB_ADDRESS)
-  await tx.wait()
+  await stakeManagerContract.authorizeHubByOwner(MANAGER_ADDRESS, RELAY_HUB_ADDRESS)
   console.log("5 - authorize hub: ✔️")
   // set relay hub 
-  tx = await paymasterContract.setRelayHub(RELAY_HUB_ADDRESS)
-  await tx.wait()
+  await paymasterContract.setRelayHub(RELAY_HUB_ADDRESS)
   console.log("6 - set relay hub : ✔️")
   // set trusted forwarder 
-  tx = await paymasterContract.setTrustedForwarder(FORWARDER_ADDRESS)
-  await tx.wait()
+  await paymasterContract.setTrustedForwarder(FORWARDER_ADDRESS)
   console.log("7 - set trusted forwarder : ✔️")
   // deposit paymaster
-  tx = await relayHubContract.depositFor(PAYMASTER_ADDRESS, { value: paymasterDeposit })
-  await tx.wait()
+  await relayHubContract.depositFor(PAYMASTER_ADDRESS, { value: paymasterDeposit })
   console.log("8 - deposit paymaster: ✔️")
   // register domain separator type
-  tx = await forwarderContract.registerDomainSeparator(GsnDomainSeparatorType.name, GsnDomainSeparatorType.version)
-  await tx.wait()
+  await forwarderContract.registerDomainSeparator(GsnDomainSeparatorType.name, GsnDomainSeparatorType.version)
   console.log("9 - register domain separator type: ✔️")
   // register request type
-  tx = await forwarderContract.registerRequestType(GsnRequestType.typeName, GsnRequestType.typeSuffix)
-  await tx.wait()
+  await forwarderContract.registerRequestType(GsnRequestType.typeName, GsnRequestType.typeSuffix)
   console.log("10 - register request type: ✔️")
 
   console.log("relay server: ✔️")
