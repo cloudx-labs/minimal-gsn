@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ethers } from "hardhat"
 import "dotenv/config"
 
@@ -10,8 +9,8 @@ async function main() {
   const maxUnstakeDelay = 30000
   const abandonmentDelay = 0
   const escheatmentDelay = 0
-  const burnAddress = process.env.BURN_ADDRESS as string
-  const devAddress = process.env.DEVELOPER_ADDRESS as string
+  const burnAddress = process.env.BURN_ADDRESS!
+  const devAddress = process.env.DEVELOPER_ADDRESS!
 
   const stakeManagerContract = await StakeManager.deploy(
     maxUnstakeDelay,
@@ -53,16 +52,16 @@ async function main() {
   const RelayHub = await ethers.getContractFactory("RelayHub")
   const stakeManager = stakeManagerContract.address
   const penalizer = penalizerContract.address
-  const batchGateway = process.env.BATCH_GATEWAY as string
+  const batchGateway = process.env.BATCH_GATEWAY!
   const relayRegistrar = relayRegistrarContract.address
   const config = {
-    maxWorkerCount: 0,
+    maxWorkerCount: 1,
     gasReserve: 0,
     postOverhead: 0,
     gasOverhead: 0,
     // maximumRecipientDeposit: 0,
     minimumUnstakeDelay: 0,
-    devAddress: process.env.DEVELOPER_ADDRESS as string,
+    devAddress: process.env.DEVELOPER_ADDRESS!,
     devFee: 0,
     // minimumStake: 0,
     // dataGasCostPerByte: 0,
