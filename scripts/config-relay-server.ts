@@ -1,5 +1,6 @@
 import { ethers } from "hardhat"
 import "dotenv/config"
+import TokenInterface from '../abis/contracts/GsnToken.sol/GsnToken.json';
 import StakeManagerInterface from '../abis/@opengsn/contracts/src/StakeManager.sol/StakeManager.json';
 import RelayHubInterface from '../abis/@opengsn/contracts/src/RelayHub.sol/RelayHub.json';
 import PaymasterInterface from '../abis/@opengsn/paymasters/contracts/AcceptEverythingPaymaster.sol/AcceptEverythingPaymaster.json';
@@ -55,6 +56,7 @@ async function main() {
   const wallet = new ethers.Wallet(TESTCHAIN_PRIVATE_KEY, provider)
   const signer = await ethers.getSigner(DEVELOPER_ADDRESS)
 
+  const tokenContract = new ethers.Contract(TOKEN_ADDRESS, TokenInterface.abi, signer);
   const stakeManagerContract = new ethers.Contract(STAKE_MANAGER_ADDRESS, StakeManagerInterface.abi, signer);
   const relayHubContract = new ethers.Contract(RELAY_HUB_ADDRESS, RelayHubInterface.abi, signer);
   const paymasterContract = new ethers.Contract(PAYMASTER_ADDRESS, PaymasterInterface.abi, signer);
@@ -65,6 +67,9 @@ async function main() {
   // send ether to Manager
   await wallet.sendTransaction({ to: MANAGER_ADDRESS, value: amountInEther })
   console.log("1 - send ether to Manager: ✔️")
+  // approve StakeManager to send $GSN
+  await tokenContract.approve(STAKE_MANAGER_ADDRESS, amountTokens)
+  console.log("2 - approve StakeManager to send $GSN: ✔️")
   // stake tokens
   await stakeManagerContract.stakeForRelayManager(TOKEN_ADDRESS, MANAGER_ADDRESS, unstakeDelay, amountTokens)
   console.log("3 - stake tokens: ✔️")
