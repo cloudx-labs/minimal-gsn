@@ -1,6 +1,8 @@
 import { ethers } from "hardhat"
 import "dotenv/config"
 
+const DEVELOPER_ADDRESS = process.env.DEVELOPER_ADDRESS!
+
 async function main() {
   // /////////////////////////////////////////////////////////////////////////
   // Stake Manager
@@ -100,7 +102,7 @@ async function main() {
   // ERC20 Token
   // /////////////////////////////////////////////////////////////////////////
   const GsnToken = await ethers.getContractFactory("GsnToken")
-  const gsnTokenContract = await GsnToken.deploy()
+  const gsnTokenContract = await GsnToken.deploy(stakeManagerContract.address)
   await gsnTokenContract.deployed()
   console.log("GsnToken app deployed to:", gsnTokenContract.address)
 }

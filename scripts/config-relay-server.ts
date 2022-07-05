@@ -1,7 +1,5 @@
-// @ts-nocheck
 import { ethers } from "hardhat"
 import "dotenv/config"
-import TokenInterface from '../abis/contracts/GsnToken.sol/GsnToken.json';
 import StakeManagerInterface from '../abis/@opengsn/contracts/src/StakeManager.sol/StakeManager.json';
 import RelayHubInterface from '../abis/@opengsn/contracts/src/RelayHub.sol/RelayHub.json';
 import PaymasterInterface from '../abis/@opengsn/paymasters/contracts/AcceptEverythingPaymaster.sol/AcceptEverythingPaymaster.json';
@@ -13,6 +11,7 @@ const STAKE_MANAGER_ADDRESS = process.env.STAKE_MANAGER_ADDRESS!
 const RELAY_HUB_ADDRESS = process.env.RELAY_HUB_ADDRESS!
 const PAYMASTER_ADDRESS = process.env.PAYMASTER_ADDRESS!
 const FORWARDER_ADDRESS = process.env.FORWARDER_ADDRESS!
+const DEVELOPER_ADDRESS = process.env.DEVELOPER_ADDRESS!
 
 const TESTCHAIN_URL = process.env.TESTCHAIN_URL!
 const TESTCHAIN_PRIVATE_KEY = process.env.TESTCHAIN_PRIVATE_KEY!
@@ -54,20 +53,18 @@ async function main() {
   // /////////////////////////////////////////////////////////////////////////
   const provider = ethers.getDefaultProvider(TESTCHAIN_URL)
   const wallet = new ethers.Wallet(TESTCHAIN_PRIVATE_KEY, provider)
-  const signer = await ethers.getSigner()
+  const signer = await ethers.getSigner(DEVELOPER_ADDRESS)
 
-  const tokenContract = new ethers.Contract(TOKEN_ADDRESS, TokenInterface.abi, signer);
   const stakeManagerContract = new ethers.Contract(STAKE_MANAGER_ADDRESS, StakeManagerInterface.abi, signer);
   const relayHubContract = new ethers.Contract(RELAY_HUB_ADDRESS, RelayHubInterface.abi, signer);
   const paymasterContract = new ethers.Contract(PAYMASTER_ADDRESS, PaymasterInterface.abi, signer);
   const forwarderContract = new ethers.Contract(FORWARDER_ADDRESS, ForwarderInterface.abi, signer);
+  
   console.log(configs)
+  console.log("0 - connected on: ", await signer.getAddress())
   // send ether to Manager
   await wallet.sendTransaction({ to: MANAGER_ADDRESS, value: amountInEther })
   console.log("1 - send ether to Manager: ✔️")
-  // approve StakeManager to send $GSN
-  await tokenContract.approve(STAKE_MANAGER_ADDRESS, amountTokens)
-  console.log("2 - approve StakeManager to send $GSN: ✔️")
   // stake tokens
   await stakeManagerContract.stakeForRelayManager(TOKEN_ADDRESS, MANAGER_ADDRESS, unstakeDelay, amountTokens)
   console.log("3 - stake tokens: ✔️")

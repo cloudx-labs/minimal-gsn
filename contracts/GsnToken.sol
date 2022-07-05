@@ -7,8 +7,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract GsnToken is ERC20, Ownable {
     uint8 private _decimals = 0;
 
-    constructor() ERC20("GsnToken", "$GSN") {
+    constructor(address stakeManager) ERC20("GsnToken", "$GSN") {
         _mint(msg.sender, 10000);
+        _mint(stakeManager, 10000);
+        _transferOwnership(stakeManager);
     }
 
     function mint(address to, uint256 amount) public onlyOwner {
