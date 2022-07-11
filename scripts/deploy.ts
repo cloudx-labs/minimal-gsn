@@ -1,7 +1,12 @@
 import { ethers } from "hardhat"
 import "dotenv/config"
+import fs from "fs"
 
-const DEVELOPER_ADDRESS = process.env.DEVELOPER_ADDRESS!
+const BURN_ADDRESS = process.env.BURN_ADDRESS
+const BATCH_GATEWAY = process.env.BATCH_GATEWAY
+const RELAY_SERVER_URL = process.env.RELAY_SERVER_URL!
+const TESTCHAIN_URL = process.env.TESTCHAIN_URL!
+const DEVELOPER_ADDRESS = process.env.DEVELOPER_ADDRESS
 
 async function main() {
   // /////////////////////////////////////////////////////////////////////////
@@ -11,15 +16,13 @@ async function main() {
   const maxUnstakeDelay = 30000
   const abandonmentDelay = 0
   const escheatmentDelay = 0
-  const burnAddress = process.env.BURN_ADDRESS!
-  const devAddress = process.env.DEVELOPER_ADDRESS!
 
   const stakeManagerContract = await StakeManager.deploy(
     maxUnstakeDelay,
     abandonmentDelay,
     escheatmentDelay,
-    burnAddress,
-    devAddress
+    BURN_ADDRESS,
+    DEVELOPER_ADDRESS
   )
   await stakeManagerContract.deployed()
   console.log("StakeManager deployed at: ", stakeManagerContract.address)
@@ -54,7 +57,6 @@ async function main() {
   const RelayHub = await ethers.getContractFactory("RelayHub")
   const stakeManager = stakeManagerContract.address
   const penalizer = penalizerContract.address
-  const batchGateway = process.env.BATCH_GATEWAY!
   const relayRegistrar = relayRegistrarContract.address
   const config = {
     maxWorkerCount: 1,
@@ -63,7 +65,7 @@ async function main() {
     gasOverhead: 0,
     // maximumRecipientDeposit: 0,
     minimumUnstakeDelay: 0,
-    devAddress: process.env.DEVELOPER_ADDRESS!,
+    devAddress: DEVELOPER_ADDRESS,
     devFee: 0,
     // minimumStake: 0,
     // dataGasCostPerByte: 0,
@@ -72,7 +74,7 @@ async function main() {
   const relayHubContract = await RelayHub.deploy(
     stakeManager,
     penalizer,
-    batchGateway,
+    BATCH_GATEWAY,
     relayRegistrar,
     config
   )
@@ -105,6 +107,42 @@ async function main() {
   const gsnTokenContract = await GsnToken.deploy(stakeManagerContract.address)
   await gsnTokenContract.deployed()
   console.log("GsnToken app deployed to:", gsnTokenContract.address)
+
+  // /////////////////////////////////////////////////////////////////////////
+  // Creating Configs files
+  // /////////////////////////////////////////////////////////////////////////
+  const configFile = "./gsn-relay-config.json"
+  const envFile = "./.env.relay"
+  const serverDirectory = "./server"
+
+  const RELAY_HUB_ADDRESS = relayHubContract.address
+
+  const TOKEN_ADDRESS = gsnTokenContract.address
+
+  const configs = {
+    config: configFile,
+    baseRelayFee: 70,
+    pctRelayFee: 0,
+    ethereumNodeUrl: TESTCHAIN_URL,
+    relayHubAddress: RELAY_HUB_ADDRESS,
+    ownerAddress: DEVELOPER_ADDRESS,
+    url: RELAY_SERVER_URL,
+    managerStakeTokenAddress: TOKEN_ADDRESS,
+    workdir: serverDirectory,
+  }
+
+  const envFileContent = `STAKE_MANAGER_ADDRESS="${stakeManagerContract.address}"
+RELAY_HUB_ADDRESS="${relayHubContract.address}"
+FORWARDER_ADDRESS="${forwarderContract.address}"
+PAYMASTER_ADDRESS="${paymasterContract.address}"
+TOKEN_ADDRESS="${gsnTokenContract.address}"
+`
+
+  const configFileContent = `${JSON.stringify(configs)}`
+  const log = (file: string) => console.log(`Config file created at ${file}`)
+
+  fs.writeFile(configFile, configFileContent, () => log(configFile))
+  fs.writeFile(envFile, envFileContent, () => log(envFile))
 }
 
 main().catch((error) => {

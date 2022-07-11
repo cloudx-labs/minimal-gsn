@@ -3,7 +3,9 @@ cache/
 artifacts/
 abis/
 typechain-types/
+
 dist/
 server/
-
 .env
+.env.relay
+gsn-relay-config.json

@@ -3,12 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc",
-    "deploy": "hardhat run scripts/deploy.ts",
+    "start": "node dist/relay-client/runServer.js --config='./gsn-relay-config.json'",
     "postinstall": "node ./patch-scrypt.js",
-    "rm-abis": "rm -rf abis cache typechain-types",
-    "rm-dist": "rm -rf tsconfig.tsbuildinfo dist",
-    "rm-server-db": "rm -rf server",
-    "rm-all": "rm -rf abis cache typechain-types tsconfig.tsbuildinfo dist server"
+    "rm-all": "rm -rf abis cache typechain-types tsconfig.tsbuildinfo dist server .env.relay gsn-relay-config.json"
   },
   "private": true,
   "devDependencies": {
